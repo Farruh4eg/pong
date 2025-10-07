@@ -1,3 +1,5 @@
+// Copyright 2025 Farruh4eg
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -71,9 +73,11 @@ void draw_field(Ball ball, Player player_one, Player player_two) {
                 printf("=");
             } else if (x == ball.x && y == ball.y) {
                 printf("0");
-            } else if (y >= player_one.pos && y <= player_one.pos + 2 && x == 1) {
+            } else if (y >= player_one.pos && y <= player_one.pos + 2 &&
+                       x == 1) {
                 printf("|");
-            } else if (y >= player_two.pos && y <= player_two.pos + 2 && x == FIELD_WIDTH - 2) {
+            } else if (y >= player_two.pos && y <= player_two.pos + 2 &&
+                       x == FIELD_WIDTH - 2) {
                 printf("|");
             } else {
                 printf(" ");
@@ -86,7 +90,7 @@ void draw_field(Ball ball, Player player_one, Player player_two) {
 
 void clear() {
     printf("\033[2J\033[H");
-    fflush(stdout);
+    fflush(stdout);  // NOLINT
 }
 
 void wait_for_frame() { usleep(MICROSECONDS_PER_FRAME); }
@@ -123,7 +127,8 @@ void get_input(Player *player_one, Player *player_two, int *to_exit) {
 }
 
 void update_ball(Ball *ball, Player player_one, Player player_two) {
-    if (ball->x == 2 && ball->dx == -1 && (ball->y >= player_one.pos && ball->y <= player_one.pos + 2)) {
+    if (ball->x == 2 && ball->dx == -1 &&
+        (ball->y >= player_one.pos && ball->y <= player_one.pos + 2)) {
         ball->dx *= -1;
     }
     if (ball->x == FIELD_WIDTH - 2 && ball->dx == 1 &&
@@ -131,7 +136,8 @@ void update_ball(Ball *ball, Player player_one, Player player_two) {
         ball->dx *= -1;
     }
 
-    if ((ball->y <= 1 && ball->dy == -1) || (ball->y >= FIELD_HEIGHT - 2 && ball->dy == 1)) {
+    if ((ball->y <= 1 && ball->dy == -1) ||
+        (ball->y >= FIELD_HEIGHT - 2 && ball->dy == 1)) {
         ball->dy *= -1;
     }
 
