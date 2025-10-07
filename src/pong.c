@@ -7,6 +7,7 @@
 #define FIELD_HEIGHT 25
 #define TARGET_FPS 15
 #define MICROSECONDS_PER_FRAME (1000000 / TARGET_FPS)
+#define WINNING_SCORE 21
 
 typedef enum { ONE, TWO } Player_number;
 
@@ -19,7 +20,8 @@ typedef struct Player {
 typedef struct Ball {
   int x;
   int y;
-  int fly_right;
+  int dx; // direction by x: -1 or 1
+  int dy; // direction by y: -1 or 1
 } Ball;
 
 void draw_field(Ball, Player, Player);
@@ -39,7 +41,7 @@ int main() {
 
   Player player_two = {TWO, 12, 0};
 
-  Ball ball = {FIELD_WIDTH / 2, FIELD_HEIGHT / 2, 1};
+  Ball ball = {FIELD_WIDTH / 2, FIELD_HEIGHT / 2, 1, 1};
 
   while (!to_exit) {
 
@@ -47,11 +49,19 @@ int main() {
 
     draw_field(ball, player_one, player_two);
 
-    update_ball(&ball, player_one, player_two);
-
-    check_goal(&ball, &player_one, &player_two);
+    printf("СЧЕТ: %d - %d\n", player_one.score, player_two.score);
+    if (player_one.score >= WINNING_SCORE) {
+      printf("PLAYER 1 WINS!\n");
+      break;
+    }
+    if (player_two.score >= WINNING_SCORE) {
+      printf("PLAYER 2 WINS!\n");
+      break;
+    }
 
     get_input(&player_one, &player_two, &to_exit);
+    update_ball(&ball, player_one, player_two);
+    check_goal(&ball, &player_one, &player_two);
 
     // can remove the next line. No fps in turn-based game, right?
     wait_for_frame();
@@ -65,10 +75,10 @@ void draw_field(Ball ball, Player player_one, Player player_two) {
         printf("=");
       } else if (x == ball.x && y == ball.y) {
         printf("0");
-      } else if (y >= player_one.pos && y <= player_one.pos + 2 && x == 0) {
+      } else if (y >= player_one.pos && y <= player_one.pos + 2 && x == 1) {
         printf("|");
       } else if (y >= player_two.pos && y <= player_two.pos + 2 &&
-                 x == FIELD_WIDTH - 1) {
+                 x == FIELD_WIDTH - 2) {
         printf("|");
       } else {
         printf(" ");
@@ -123,29 +133,23 @@ void get_input(Player *player_one, Player *player_two, int *to_exit) {
   }
 }
 
-int to_deflect(Ball ball, Player player) {
-  if (ball.x - 1 == 0 && ball.y >= player.pos && ball.y <= player.pos + 2) {
-    return 1;
-  } else if (ball.x + 1 == FIELD_WIDTH - 2 && ball.y >= player.pos &&
-             ball.y <= player.pos + 2) {
-    return 1;
-  }
-
-  return 0;
-}
-
 void update_ball(Ball *ball, Player player_one, Player player_two) {
-  if (to_deflect(*ball, player_one)) {
-    ball->fly_right = 1;
-  } else if (to_deflect(*ball, player_two)) {
-    ball->fly_right = 0;
+  if (ball->x == 2 && ball->dx == -1 &&
+      (ball->y >= player_one.pos && ball->y <= player_one.pos + 2)) {
+    ball->dx *= -1;
+  }
+  if (ball->x == FIELD_WIDTH - 2 && ball->dx == 1 &&
+      (ball->y >= player_two.pos && ball->y <= player_two.pos + 2)) {
+    ball->dx *= -1;
   }
 
-  if (ball->fly_right) {
-    ball->x++;
-  } else if (!ball->fly_right) {
-    ball->x--;
+  if ((ball->y <= 1 && ball->dy == -1) ||
+      (ball->y >= FIELD_HEIGHT - 2 && ball->dy == 1)) {
+    ball->dy *= -1;
   }
+
+  ball->x += ball->dx;
+  ball->y += ball->dy;
 }
 
 void check_goal(Ball *ball, Player *player_one, Player *player_two) {
@@ -153,11 +157,11 @@ void check_goal(Ball *ball, Player *player_one, Player *player_two) {
     player_two->score++;
     ball->x = FIELD_WIDTH / 2;
     ball->y = FIELD_HEIGHT / 2;
-    ball->fly_right = 0;
+    ball->dx = 1;
   } else if (ball->x > 79) {
     player_one->score++;
     ball->x = FIELD_WIDTH / 2;
     ball->y = FIELD_HEIGHT / 2;
-    ball->fly_right = 1;
+    ball->dx = -1;
   }
 }
