@@ -9,10 +9,7 @@
 #define MICROSECONDS_PER_FRAME (1000000 / TARGET_FPS)
 #define WINNING_SCORE 21
 
-typedef enum { ONE, TWO } Player_number;
-
 typedef struct Player {
-  Player_number number;
   int pos;
   int score;
 } Player;
@@ -37,9 +34,9 @@ int main() {
 
   int to_exit = 0;
 
-  Player player_one = {ONE, 1, 0};
+  Player player_one = {1, 0};
 
-  Player player_two = {TWO, 12, 0};
+  Player player_two = {12, 0};
 
   Ball ball = {FIELD_WIDTH / 2, FIELD_HEIGHT / 2, 1, 1};
 
